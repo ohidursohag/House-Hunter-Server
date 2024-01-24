@@ -208,6 +208,96 @@ app.get("/house-hunter/api/v1/singleHouse/:id", async (req, res) => {
   }
 });
 
+//  Add new Houses
+app.post("/house-hunter/api/v1/addHouse", async (req, res) => {
+  try {
+    const house = req.body;
+    const newHouse = new housesModel(house);
+    const result = await newHouse.save();
+    return res.send(result);
+  } catch (error) {
+    return res.send({ error: true, message: error.message });
+  }
+});
+
+// add bookings
+app.post("/house-hunter/api/v1/addBook", async (req, res) => {
+  try {
+    const book = req.body;
+    const previousBookings = await bookingsModel.find({ email: book.email });
+    if (previousBookings.length < 2) {
+      const bookDoc = new bookingsModel(book);
+      const result = await bookDoc.save();
+      return res.send(result);
+    } else {
+      res.send({
+        success: false,
+        error: "Booking limit exceed. You can book maximum 2 houses ",
+      });
+    }
+  } catch (error) {
+    return res.send({ error: true, message: error.message });
+  }
+});
+
+// Update House Data by id
+app.put("/house-hunter/api/v1/editHouse/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const {
+      name,
+      address,
+      city,
+      bedrooms,
+      bathrooms,
+      size,
+      image,
+      date,
+      rent,
+      number,
+      des,
+      email,
+      owner_name,
+    } = req.body;
+    const query = {
+      name,
+      address,
+      city,
+      bedrooms,
+      bathrooms,
+      size,
+      image,
+      date,
+      rent,
+      number,
+      des,
+      email,
+      owner_name,
+    };
+    const result = await housesModel.findOneAndUpdate({ _id: id }, query, {
+      returnOriginal: false,
+    });
+    return res.send(result);
+  } catch (error) {
+    return res.send({ error: true, message: error.message });
+  }
+});
+
+// Update House booking Status by id
+app.patch("/house-hunter/api/v1/updateStatus/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+  const query = {
+    status: "booked",
+  };
+  const result = await housesModel.findOneAndUpdate({ _id: id }, query, {
+    returnOriginal: false,
+  });
+ return res.send(result);
+  } catch (error) {
+    return res.send({ error: true, message: error.message });
+  }
+});
 
 
 
